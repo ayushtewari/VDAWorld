@@ -1,0 +1,58 @@
+# Local inference services. Each service runs in its own Conda environment.
+# Change GPU selections and environment names to match the deployment.
+#
+# Services bind to loopback by default. If a port changes, set the matching
+# VDAWORLD_*_URL environment variable described in docs/external-services.md.
+
+vllm:
+  enabled: false
+  type: vllm
+  conda_env: vllm
+  model: Qwen/Qwen3-VL-235B-A22B-Instruct-FP8
+  host: 127.0.0.1
+  port: 5006
+  cvd: "1,2,3,4"
+  gpu_memory_utilization: 0.85
+  max_model_len: 131072
+  # Match this to the number of GPUs exposed by cvd when using tensor
+  # parallelism.
+  tensor_parallel_size: 4
+  trust_remote_code: true
+  enable_auto_tool_choice: true
+  tool_call_parser: hermes
+
+segmentation:
+  enabled: true
+  type: conda
+  conda_env: sam3
+  module: vdaworld.api.segmentation.server
+  host: 127.0.0.1
+  port: 5001
+  cvd: "0"
+
+depth_moge:
+  enabled: true
+  type: conda
+  conda_env: moge
+  module: vdaworld.api.depth.moge_server
+  host: 127.0.0.1
+  port: 5004
+  cvd: "0"
+
+depth_vggt:
+  enabled: false
+  type: conda
+  conda_env: vggt
+  module: vdaworld.api.depth.server
+  host: 127.0.0.1
+  port: 5003
+  cvd: "0"
+
+mesh_generation:
+  enabled: true
+  type: conda
+  conda_env: sam3d-objects
+  module: vdaworld.api.mesh.server
+  host: 127.0.0.1
+  port: 5005
+  cvd: "0"

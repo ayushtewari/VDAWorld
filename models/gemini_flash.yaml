@@ -1,0 +1,5 @@
+model_name: gemini-3.5-flash
+backend: gemini_api
+input_price: 1.50 # $ per 1M tokens
+output_price: 9.00
+cache_price: 0.05

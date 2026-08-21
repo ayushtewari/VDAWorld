@@ -1,0 +1,79 @@
+[project]
+name = "vdaworld"
+version = "0.1.0"
+description = "VLM-directed generation and refinement of executable world simulators"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "anthropic>=0.109.1",
+    "fastapi>=0.136.0",
+    "filelock>=3.16.0",
+    "google-genai>=1.70.0",
+    "imageio[ffmpeg]>=2.37.3",
+    "matplotlib>=3.10.8",
+    "mujoco>=3.6.0",
+    "numpy>=2.4.4",
+    "openai>=2.32.0",
+    "opencv-python>=4.13.0.92",
+    "pillow>=12.2.0",
+    "pydantic>=2.12.5",
+    "pygame>=2.6.1",
+    "pymunk>=7.2.0",
+    "pyransac3d>=0.6.0",
+    "python-multipart>=0.0.30",
+    "pyyaml>=6.0.3",
+    "rich>=13.0.0",
+    "rtree>=1.4.1",
+    "scikit-image>=0.26.0",
+    "scipy>=1.17.1",
+    "tqdm>=4.67.3",
+    "trimesh>=4.11.5",
+    "uvicorn>=0.46.0",
+]
+
+[project.scripts]
+vdaworld = "vdaworld.main:main"
+vdaworld-start-api = "vdaworld.start_api:main"
+vdaworld-results = "vdaworld.gui:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.20.0",
+    "pytest>=9.0.2",
+    "ruff>=0.15.8",
+    "types-pyyaml>=6.0.12.20250915",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "eval: evaluation test requiring external model services",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "src"
+explicit_package_bases = true
+check_untyped_defs = true
+warn_unused_ignores = true
+disable_error_code = ["import-untyped"]
+
+[[tool.mypy.overrides]]
+module = [
+    "inference",
+    "manifold3d",
+    "moge.*",
+    "sam3.*",
+    "sam3d_objects.*",
+    "torch",
+    "torch.*",
+    "vggt.*",
+]
+ignore_missing_imports = true

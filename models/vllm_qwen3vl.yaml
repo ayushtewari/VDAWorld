@@ -1,0 +1,6 @@
+model_name: Qwen/Qwen3-VL-235B-A22B-Instruct-FP8
+backend: vllm
+base_url: http://127.0.0.1:5006/v1
+input_price: 0.0
+output_price: 0.0
+cache_price: 0.0

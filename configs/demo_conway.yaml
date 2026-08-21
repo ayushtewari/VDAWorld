@@ -1,0 +1,15 @@
+# Conway's Game of Life example using a glider on a 9x16 grid.
+vlm:
+  model: gemini_pro
+  temperature: 1.0
+
+task:
+  image_path: "example_data/glider_basic.png"
+  caption: "Conway's Game of Life on a 9x16 grid. One frame represents one step of the game. The boundary condition is dead (i.e. cells outside the grid are dead)."
+  output_dir: "results/demo/conway"
+  simulator_class_name: "VideoSimulation"
+  prompts_path: "prompts/generic"
+  fps: 10
+  simulation_steps: 30
+  frame_size: [1280, 720]
+  critic_max_turns: 25

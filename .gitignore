@@ -1,0 +1,43 @@
+# Python bytecode and build artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+wheels/
+
+# Test, lint, and coverage output
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Editor and assistant-local state
+.DS_Store
+.idea/
+.vscode/
+.claude/
+.codex/
+.agents/
+
+# Machine-specific configuration
+api_config.local.yaml
+configs/local/
+models/local/
+
+# Generated data and model outputs
+results/
+outputs/
+demo_output/
+/*_figure/

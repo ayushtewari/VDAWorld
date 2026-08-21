@@ -1,0 +1,1909 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VDAWorld Demo</title>
+    <style>
+      /* ── Reset & base ─────────────────────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0b0d14;
+        --surface: #13161f;
+        --surface2: #1a1e2e;
+        --border: #252a3d;
+        --border-light: #2e3450;
+        --accent: #6366f1;
+        --accent-glow: rgba(99, 102, 241, 0.25);
+        --accent2: #22d3ee;
+        --text: #e2e8f0;
+        --text-2: #94a3b8;
+        --text-3: #5a6a8a;
+        --success: #22c55e;
+        --error: #f87171;
+        --warn: #fbbf24;
+        --radius: 10px;
+        --radius-lg: 16px;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        --transition: 200ms ease;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ── Scrollbar ────────────────────────────────────────────────────────── */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--border-light);
+      }
+
+      /* ── Navbar ───────────────────────────────────────────────────────────── */
+      .navbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 24px;
+        height: 56px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(11, 13, 20, 0.8);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        flex-shrink: 0;
+      }
+      .navbar-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: -0.3px;
+      }
+      .logo-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+      }
+      .navbar-subtitle {
+        color: var(--text-3);
+        font-size: 12px;
+        margin-left: 4px;
+      }
+      .navbar-spacer {
+        flex: 1;
+      }
+      .badge-research {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--accent);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      /* ── Layout ───────────────────────────────────────────────────────────── */
+      .main {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        flex: 1;
+        overflow: hidden;
+        height: calc(100vh - 56px);
+      }
+
+      /* ── Left panel ───────────────────────────────────────────────────────── */
+      .left-panel {
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .panel-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .panel-tab {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-2);
+        border-bottom: 2px solid transparent;
+        transition: var(--transition);
+        user-select: none;
+      }
+      .panel-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .panel-tab:hover:not(.active) {
+        color: var(--text);
+        background: var(--surface);
+      }
+
+      .panel-content {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      /* ── New run form ─────────────────────────────────────────────────────── */
+      .form-section {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .dropzone {
+        border: 2px dashed var(--border);
+        border-radius: var(--radius-lg);
+        padding: 32px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        background: var(--surface);
+      }
+      .dropzone:hover,
+      .dropzone.drag-over {
+        border-color: var(--accent);
+        background: var(--surface2);
+      }
+      .dropzone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .dropzone-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+        opacity: 0.6;
+      }
+      .dropzone-text {
+        color: var(--text-2);
+        font-size: 13px;
+      }
+      .dropzone-text strong {
+        color: var(--accent);
+      }
+      .dropzone-preview {
+        width: 100%;
+        aspect-ratio: 16/9;
+        object-fit: cover;
+        border-radius: 8px;
+        display: block;
+        margin-top: 8px;
+      }
+
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .form-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .form-input,
+      .form-textarea,
+      .form-select {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: 10px 12px;
+        font-family: inherit;
+        font-size: 14px;
+        width: 100%;
+        transition: var(--transition);
+        outline: none;
+      }
+      .form-input:focus,
+      .form-textarea:focus,
+      .form-select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+      }
+      .form-textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+      .form-select {
+        cursor: pointer;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 20px;
+        border-radius: var(--radius);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+        width: 100%;
+        letter-spacing: -0.1px;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: #4f52d9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px var(--accent-glow);
+      }
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .btn-secondary {
+        background: var(--surface2);
+        color: var(--text-2);
+        border: 1px solid var(--border);
+      }
+      .btn-secondary:hover {
+        color: var(--text);
+        border-color: var(--border-light);
+      }
+
+      /* ── History panel ────────────────────────────────────────────────────── */
+      .history-list {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .history-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--text-3);
+      }
+
+      .hist-card {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        transition: var(--transition);
+        align-items: flex-start;
+      }
+      .hist-card:hover {
+        border-color: var(--accent);
+        background: var(--surface2);
+      }
+      .hist-card.active {
+        border-color: var(--accent);
+        background: var(--surface2);
+      }
+      .hist-thumb {
+        width: 72px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 6px;
+        flex-shrink: 0;
+        background: var(--surface2);
+      }
+      .hist-thumb-placeholder {
+        width: 72px;
+        height: 40px;
+        border-radius: 6px;
+        flex-shrink: 0;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .hist-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .hist-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hist-caption {
+        font-size: 11px;
+        color: var(--text-2);
+        margin-top: 2px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .hist-meta {
+        font-size: 10px;
+        color: var(--text-3);
+        margin-top: 4px;
+      }
+      .hist-live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--accent);
+        background: rgba(99, 102, 241, 0.12);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 10px;
+        padding: 1px 7px;
+        margin-top: 4px;
+      }
+      .hist-live-badge .pulse {
+        width: 6px;
+        height: 6px;
+      }
+
+      /* ── Right panel ──────────────────────────────────────────────────────── */
+      .right-panel {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* ── Welcome state ────────────────────────────────────────────────────── */
+      .welcome {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 40px;
+        text-align: center;
+      }
+      .welcome-icon {
+        font-size: 56px;
+        opacity: 0.4;
+      }
+      .welcome h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .welcome p {
+        color: var(--text-2);
+        max-width: 400px;
+        line-height: 1.7;
+      }
+      .welcome-steps {
+        display: flex;
+        gap: 16px;
+        margin-top: 8px;
+      }
+      .step-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        text-align: left;
+        max-width: 160px;
+      }
+      .step-num {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+      }
+      .step-desc {
+        font-size: 12px;
+        color: var(--text-2);
+      }
+
+      /* ── Run view ─────────────────────────────────────────────────────────── */
+      .run-view {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .run-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+      .run-title {
+        font-size: 15px;
+        font-weight: 700;
+        flex: 1;
+      }
+      .run-caption {
+        font-size: 12px;
+        color: var(--text-2);
+        margin-top: 2px;
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .status-pill.running {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--accent);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+      }
+      .status-pill.complete {
+        background: rgba(34, 197, 94, 0.12);
+        color: var(--success);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+      .status-pill.failed {
+        background: rgba(248, 113, 113, 0.12);
+        color: var(--error);
+        border: 1px solid rgba(248, 113, 113, 0.3);
+      }
+      .status-pill.starting {
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--warn);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+      }
+      .status-pill.cancelled {
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-2);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+      }
+      .status-pill.queued {
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--warn);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+      }
+      .spinner {
+        width: 10px;
+        height: 10px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── Results tabs ─────────────────────────────────────────────────────── */
+      .results-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+        padding: 0 20px;
+      }
+      .results-tab {
+        padding: 10px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-2);
+        border-bottom: 2px solid transparent;
+        transition: var(--transition);
+        user-select: none;
+      }
+      .results-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .results-tab:hover:not(.active) {
+        color: var(--text);
+      }
+
+      .tab-panel-wrap {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .tab-panel {
+        display: none;
+        padding: 16px 20px;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* ── Tool call feed ───────────────────────────────────────────────────── */
+      .feed {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .tc-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        animation: slideIn 0.25s ease-out;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .tc-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .tc-header:hover {
+        background: var(--surface2);
+      }
+      .tc-index {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--text-3);
+        flex-shrink: 0;
+      }
+      .tc-tool-name {
+        font-size: 13px;
+        font-weight: 600;
+        flex: 1;
+        font-family: ui-monospace, monospace;
+      }
+      .tc-summary {
+        font-size: 11px;
+        color: var(--text-2);
+        text-align: right;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .tc-chevron {
+        color: var(--text-3);
+        font-size: 10px;
+        transition: transform var(--transition);
+      }
+      .tc-card.open .tc-chevron {
+        transform: rotate(180deg);
+      }
+
+      .tc-body {
+        padding: 0 14px 14px;
+        display: none;
+      }
+      .tc-card.open .tc-body {
+        display: block;
+      }
+
+      .tc-section {
+        margin-top: 10px;
+      }
+      .tc-section-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-3);
+        margin-bottom: 6px;
+      }
+      .tc-code {
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        color: var(--text-2);
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+      }
+      .tc-result {
+        background: rgba(34, 197, 94, 0.06);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 12px;
+        font-family: ui-monospace, monospace;
+        color: var(--text);
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .tc-images {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .tc-img {
+        max-width: 200px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1px solid var(--border);
+      }
+      .tc-img:hover {
+        border-color: var(--accent);
+        transform: scale(1.02);
+      }
+
+      /* ── Tool type badges ────────────────────────────────────────────────── */
+      .tc-tag {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        flex-shrink: 0;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+      }
+      .tc-tag.generative {
+        background: rgba(139, 92, 246, 0.15);
+        color: #a78bfa;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+      }
+      .tc-tag.critic {
+        background: rgba(251, 146, 60, 0.12);
+        color: #fb923c;
+        border: 1px solid rgba(251, 146, 60, 0.3);
+      }
+      .tc-tag.info {
+        background: rgba(56, 189, 248, 0.1);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.25);
+      }
+
+      /* ── Output section (always visible above tabs) ───────────────────── */
+      .output-section {
+        flex-shrink: 0;
+        padding: 16px 20px 0;
+      }
+      .output-empty {
+        padding: 32px 20px;
+        text-align: center;
+        color: var(--text-3);
+        font-size: 13px;
+        border: 1px dashed var(--border);
+        border-radius: var(--radius);
+        margin: 16px 20px;
+      }
+
+      /* ── Stats bar ────────────────────────────────────────────────────────── */
+      .stats-bar {
+        display: flex;
+        gap: 20px;
+        padding: 12px 20px;
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+        background: var(--surface);
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .stat-label {
+        font-size: 10px;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .stat-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      /* ── Output tab ───────────────────────────────────────────────────────── */
+      .output-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .output-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .output-card-header {
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .output-card-body {
+        padding: 12px;
+      }
+
+      video,
+      .output-img {
+        width: 100%;
+        border-radius: 6px;
+        display: block;
+        background: var(--bg);
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .compare-label {
+        font-size: 10px;
+        color: var(--text-3);
+        margin-bottom: 4px;
+        text-align: center;
+      }
+
+      /* ── Code tab ─────────────────────────────────────────────────────────── */
+      .code-wrapper {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .code-header {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-2);
+      }
+      .code-header .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+      }
+      .code-wrapper pre {
+        margin: 0;
+        max-height: 600px;
+        overflow-y: auto;
+      }
+      .code-wrapper pre code {
+        font-size: 12px;
+      }
+
+      /* ── Log panel ────────────────────────────────────────────────────────── */
+      .log-toggle {
+        padding: 8px 20px;
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        color: var(--text-3);
+        font-size: 11px;
+        font-weight: 500;
+        user-select: none;
+        background: var(--surface);
+        transition: var(--transition);
+      }
+      .log-toggle:hover {
+        color: var(--text-2);
+      }
+      .log-panel {
+        border-top: 1px solid var(--border);
+        background: var(--bg);
+        flex-shrink: 0;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        overflow-y: auto;
+        display: none;
+        max-height: 160px;
+      }
+      .log-panel.open {
+        display: block;
+      }
+      .log-line {
+        padding: 2px 20px;
+        line-height: 1.5;
+      }
+      .log-line.INFO {
+        color: var(--text-3);
+      }
+      .log-line.WARNING {
+        color: var(--warn);
+      }
+      .log-line.ERROR {
+        color: var(--error);
+      }
+
+      /* ── Lightbox ─────────────────────────────────────────────────────────── */
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        display: none;
+      }
+      .lightbox.open {
+        display: flex;
+      }
+      .lightbox img {
+        max-width: 90vw;
+        max-height: 90vh;
+        border-radius: 8px;
+        object-fit: contain;
+      }
+
+      /* ── Misc ─────────────────────────────────────────────────────────────── */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 4px 0;
+      }
+      .text-muted {
+        color: var(--text-2);
+      }
+      .mono {
+        font-family: ui-monospace, monospace;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      .pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(0.8);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-logo">
+        <div class="logo-icon">🌍</div>
+        <span>VDAWorld</span>
+        <span class="navbar-subtitle">World Generation</span>
+      </div>
+      <div class="navbar-spacer"></div>
+      <span class="badge-research">Research Demo</span>
+    </nav>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- ── Left panel ──────────────────────────────────────────────────── -->
+      <div class="left-panel">
+        <div class="panel-tabs">
+          <div class="panel-tab active" data-tab="new-run">New Run</div>
+          <div class="panel-tab" data-tab="history">History</div>
+        </div>
+
+        <div class="panel-content">
+          <!-- New Run -->
+          <div id="tab-new-run" class="form-section">
+            <!-- Image drop -->
+            <div class="form-field">
+              <label class="form-label">Input Image</label>
+              <div class="dropzone" id="dropzone">
+                <input type="file" id="image-input" accept="image/*" />
+                <div id="drop-placeholder">
+                  <div class="dropzone-icon">🖼️</div>
+                  <div class="dropzone-text">
+                    <strong>Drop image here</strong> or click to browse
+                  </div>
+                  <div
+                    class="dropzone-text"
+                    style="margin-top: 4px; font-size: 11px"
+                  >
+                    PNG, JPG — the scene to simulate
+                  </div>
+                </div>
+                <img
+                  id="image-preview"
+                  class="dropzone-preview hidden"
+                  alt="Preview"
+                />
+              </div>
+            </div>
+
+            <!-- Caption -->
+            <div class="form-field">
+              <label class="form-label">Scene Caption</label>
+              <textarea
+                class="form-textarea"
+                id="caption-input"
+                placeholder="Provide a caption for your scene."
+              ></textarea>
+            </div>
+
+            <!-- Options row -->
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-label">Model</label>
+                <select class="form-select" id="model-select">
+                  <option value="gemini_flash">Gemini Flash</option>
+                  <option value="gemini_pro">Gemini Pro</option>
+                  <option value="openai_gpt55">GPT-5.5</option>
+                  <option value="claude_opus48">Claude Opus 4.8</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-label">Run Name</label>
+                <input
+                  class="form-input"
+                  id="name-input"
+                  type="text"
+                  placeholder="auto (timestamp)"
+                />
+              </div>
+            </div>
+
+            <button
+              class="btn btn-primary"
+              id="generate-btn"
+              onclick="startGeneration()"
+            >
+              <span>▶</span> Generate World
+            </button>
+            <div
+              id="queue-msg"
+              class="hidden"
+              style="text-align: center; font-size: 12px; color: var(--text-3)"
+            >
+              Another run is in progress. Your run is queued.
+            </div>
+          </div>
+
+          <!-- History -->
+          <div id="tab-history" class="hidden">
+            <div class="history-list" id="history-list">
+              <div class="history-empty">Loading history…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Right panel ─────────────────────────────────────────────────── -->
+      <div class="right-panel" id="right-panel">
+        <!-- Welcome -->
+        <div class="welcome" id="welcome-view">
+          <div class="welcome-icon">🌍</div>
+          <h2>VDAWorld Pipeline Demo</h2>
+          <p>
+            Provide an image and caption, then watch as an AI agent writes and
+            refines physics simulator code in real time.
+          </p>
+          <div class="welcome-steps">
+            <div class="step-card">
+              <div class="step-num">Step 1</div>
+              <div class="step-desc">Upload a photo of a physical scene</div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">Step 2</div>
+              <div class="step-desc">Describe the motion in the caption</div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">Step 3</div>
+              <div class="step-desc">Watch the AI generate a simulator</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Run view -->
+        <div class="run-view hidden" id="run-view">
+          <!-- Header -->
+          <div class="run-header">
+            <div style="flex: 1">
+              <div class="run-title" id="run-name">—</div>
+              <div class="run-caption text-muted" id="run-caption"></div>
+            </div>
+            <div class="status-pill starting" id="status-pill">
+              <span class="spinner"></span> Starting
+            </div>
+            <button
+              class="btn btn-secondary hidden"
+              id="cancel-btn"
+              onclick="cancelRun()"
+              style="width: auto; padding: 6px 14px; font-size: 12px"
+            >
+              ✕ Cancel
+            </button>
+            <button
+              class="btn btn-secondary hidden"
+              id="rerun-btn"
+              onclick="rerunGeneration()"
+              style="width: auto; padding: 6px 14px; font-size: 12px"
+            >
+              ↺ Re-run
+            </button>
+          </div>
+
+          <!-- Output section: always visible at top once complete -->
+          <div id="output-section" class="hidden"></div>
+
+          <!-- Results tabs: shown once complete, above scrollable content -->
+          <div class="results-tabs hidden" id="results-tabs">
+            <div class="results-tab active" data-rtab="turns">Turns</div>
+            <div class="results-tab" data-rtab="code">Code</div>
+            <div class="results-tab" data-rtab="response">Response</div>
+            <div class="results-tab" data-rtab="prompt">Prompt</div>
+            <div class="results-tab" data-rtab="thinking">Thinking</div>
+          </div>
+
+          <!-- Scrollable content area -->
+          <div class="tab-panel-wrap">
+            <!-- Live feed (during generation) -->
+            <div id="live-feed-wrap" style="padding: 16px">
+              <div class="feed" id="live-feed"></div>
+            </div>
+
+            <!-- Tab panels (after complete) -->
+            <div id="tab-turns" class="tab-panel"></div>
+            <div id="tab-code" class="tab-panel"></div>
+            <div id="tab-response" class="tab-panel"></div>
+            <div id="tab-prompt" class="tab-panel"></div>
+            <div id="tab-thinking" class="tab-panel"></div>
+          </div>
+
+          <!-- Stats bar (after complete) -->
+          <div class="stats-bar hidden" id="stats-bar">
+            <div class="stat">
+              <div class="stat-label">Tool Calls</div>
+              <div class="stat-value" id="stat-tc">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Elapsed</div>
+              <div class="stat-value" id="stat-elapsed">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Input Tokens</div>
+              <div class="stat-value" id="stat-in">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Output Tokens</div>
+              <div class="stat-value" id="stat-out">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Cached</div>
+              <div class="stat-value" id="stat-cache">—</div>
+            </div>
+          </div>
+
+          <!-- Log panel -->
+          <div class="log-toggle" id="log-toggle" onclick="toggleLog()">
+            <span id="log-toggle-icon">▸</span> Console Log
+            <span id="log-count" style="margin-left: auto; opacity: 0.5"
+              >0 lines</span
+            >
+          </div>
+          <div class="log-panel" id="log-panel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <img id="lightbox-img" src="" alt="" />
+    </div>
+
+    <script>
+      // ── State ─────────────────────────────────────────────────────────────────────
+      let currentJobId = null;
+      let currentGenName = null;
+      let eventSource = null;
+      let logLines = 0;
+      let isRunning = false;
+      let statusPollInterval = null;
+
+      // ── Tab switching (left panel) ─────────────────────────────────────────────
+      document.querySelectorAll(".panel-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".panel-tab")
+            .forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          const target = tab.dataset.tab;
+          document
+            .getElementById("tab-new-run")
+            .classList.toggle("hidden", target !== "new-run");
+          document
+            .getElementById("tab-history")
+            .classList.toggle("hidden", target !== "history");
+          if (target === "history") loadHistory();
+        });
+      });
+
+      // ── Results tab switching ──────────────────────────────────────────────────
+      document.querySelectorAll(".results-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".results-tab")
+            .forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          const target = tab.dataset.rtab;
+          document
+            .querySelectorAll(".tab-panel")
+            .forEach((p) => p.classList.remove("active"));
+          const panel = document.getElementById("tab-" + target);
+          if (panel) panel.classList.add("active");
+        });
+      });
+
+      // ── Image drop zone ────────────────────────────────────────────────────────
+      const dropzone = document.getElementById("dropzone");
+      const imageInput = document.getElementById("image-input");
+      const preview = document.getElementById("image-preview");
+      const placeholder = document.getElementById("drop-placeholder");
+      let selectedImageFile = null;
+
+      imageInput.addEventListener("change", () =>
+        handleFile(imageInput.files[0]),
+      );
+      dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("drag-over");
+      });
+      dropzone.addEventListener("dragleave", () =>
+        dropzone.classList.remove("drag-over"),
+      );
+      dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("drag-over");
+        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+      });
+
+      function handleFile(file) {
+        if (!file) return;
+        selectedImageFile = file;
+        const url = URL.createObjectURL(file);
+        preview.src = url;
+        preview.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+      }
+
+      // ── Generation ─────────────────────────────────────────────────────────────
+      async function startGeneration() {
+        const imageFile = selectedImageFile;
+        const caption = document.getElementById("caption-input").value.trim();
+
+        if (!imageFile) {
+          alert("Please select an image first.");
+          return;
+        }
+        if (!caption) {
+          alert("Please enter a caption.");
+          return;
+        }
+
+        const model = document.getElementById("model-select").value;
+        const name = document.getElementById("name-input").value.trim();
+
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        formData.append("caption", caption);
+        formData.append("model", model);
+        if (name) formData.append("name", name);
+
+        document.getElementById("generate-btn").disabled = true;
+        setRunView(null, caption);
+
+        try {
+          const resp = await fetch("/api/generate", {
+            method: "POST",
+            body: formData,
+          });
+          if (!resp.ok) throw new Error(await resp.text());
+          const data = await resp.json();
+          currentJobId = data.job_id;
+          currentGenName = data.name;
+          isRunning = true;
+          // Persist so page reload can re-attach
+          sessionStorage.setItem("vdaworld_job", JSON.stringify({
+            jobId: data.job_id, name: data.name, caption,
+          }));
+          setRunView(data.name, caption);
+          await startStream(data.job_id, data.name);
+        } catch (e) {
+          alert("Failed to start: " + e.message);
+          document.getElementById("generate-btn").disabled = false;
+        }
+      }
+
+      function setRunView(name, caption) {
+        document.getElementById("welcome-view").classList.add("hidden");
+        document.getElementById("run-view").classList.remove("hidden");
+        document.getElementById("run-name").textContent = name || "Initialising…";
+        document.getElementById("run-caption").textContent = caption;
+        document.getElementById("live-feed").innerHTML = "";
+        document.getElementById("live-feed-wrap").style.display = "block";
+        document.getElementById("output-section").classList.add("hidden");
+        document.getElementById("output-section").innerHTML = "";
+        document.getElementById("results-tabs").classList.add("hidden");
+        document.getElementById("stats-bar").classList.add("hidden");
+        const cancelBtn = document.getElementById("cancel-btn");
+        cancelBtn.classList.add("hidden");
+        cancelBtn.disabled = false;
+        document.getElementById("log-panel").innerHTML = "";
+        document.getElementById("log-panel").classList.remove("open");
+        logLines = 0;
+        document.getElementById("log-count").textContent = "0 lines";
+
+        ["tab-turns", "tab-code", "tab-response", "tab-prompt", "tab-thinking"].forEach((id) => {
+          const el = document.getElementById(id);
+          el.innerHTML = "";
+          el.classList.remove("active");
+        });
+
+        // Start polling so we catch completion even if SSE stalls
+        if (currentJobId) startStatusPolling(currentJobId);
+      }
+
+      // ── SSE stream ────────────────────────────────────────────────────────────
+
+      // Start (or re-start) the SSE stream for a job.
+      // First fetches /api/status to initialise the UI, then opens the stream.
+      async function startStream(jobId, genName) {
+        if (eventSource) { eventSource.close(); eventSource = null; }
+
+        // Seed the UI with the current server-side status before the stream opens
+        try {
+          const sr = await fetch(`/api/status/${jobId}`);
+          if (sr.ok) {
+            const st = await sr.json();
+            const activeStatuses = ["queued", "starting", "running"];
+            if (!activeStatuses.includes(st.status)) {
+              // Job already finished — show result and stop
+              isRunning = false;
+              stopStatusPolling();
+              sessionStorage.removeItem("vdaworld_job");
+              document.getElementById("generate-btn").disabled = false;
+              if (st.status === "complete" && genName) loadGenerationResults(genName);
+              return;
+            }
+            // Synthesise a status event so the pill is current immediately.
+            handleEvent({ type: "status", status: st.status,
+                          position: st.queue_position }, genName);
+          }
+        } catch (_) {}
+
+        eventSource = new EventSource(`/api/stream/${jobId}`);
+        eventSource.onmessage = (e) => handleEvent(JSON.parse(e.data), genName);
+        eventSource.onerror = () => {
+          // Connection dropped — wait 2 s then reconnect (startStream re-checks status)
+          if (eventSource) { eventSource.close(); eventSource = null; }
+          if (currentJobId === jobId && isRunning) {
+            setTimeout(() => startStream(jobId, genName), 2000);
+          }
+        };
+      }
+
+      function handleEvent(evt, genName) {
+        switch (evt.type) {
+          case "status":
+            handleStatus(evt, genName);
+            break;
+          case "tool_call":
+            addToolCallCard(evt.data, "live-feed");
+            break;
+          case "log":
+            appendLog(evt);
+            break;
+          case "done":
+            if (eventSource) { eventSource.close(); eventSource = null; }
+            isRunning = false;
+            stopStatusPolling();
+            sessionStorage.removeItem("vdaworld_job");
+            document.getElementById("generate-btn").disabled = false;
+            // Reload full details after a short delay to let filesystem settle
+            if (genName) setTimeout(() => loadGenerationResults(genName), 800);
+            break;
+        }
+      }
+
+      function handleStatus(evt, genName) {
+        const pill = document.getElementById("status-pill");
+        const cancelBtn = document.getElementById("cancel-btn");
+        const status = evt.status;
+        pill.className = `status-pill ${status}`;
+
+        const isActive = ["queued", "starting", "running"].includes(status);
+        cancelBtn.classList.toggle("hidden", !isActive);
+        document.getElementById("rerun-btn").classList.toggle("hidden", isActive);
+
+        if (status === "queued") {
+          const pos = evt.position ?? "?";
+          pill.innerHTML = `<span class="pulse"></span> Queued #${pos}`;
+        } else if (status === "starting") {
+          pill.innerHTML = '<span class="spinner"></span> Starting';
+        } else if (status === "running") {
+          pill.innerHTML = '<span class="spinner"></span> Running';
+        } else if (status === "complete") {
+          pill.innerHTML = "✓ Complete";
+          document.getElementById("stats-bar").classList.remove("hidden");
+          if (evt.tool_calls !== undefined)
+            document.getElementById("stat-tc").textContent = evt.tool_calls;
+          if (evt.elapsed !== undefined)
+            document.getElementById("stat-elapsed").textContent = evt.elapsed + "s";
+          if (evt.input_tokens !== undefined)
+            document.getElementById("stat-in").textContent = fmtNum(evt.input_tokens);
+          if (evt.output_tokens !== undefined)
+            document.getElementById("stat-out").textContent = fmtNum(evt.output_tokens);
+          if (evt.cached_tokens !== undefined)
+            document.getElementById("stat-cache").textContent = fmtNum(evt.cached_tokens);
+        } else if (status === "failed") {
+          pill.innerHTML = "✗ Failed";
+        } else if (status === "cancelled") {
+          pill.innerHTML = "— Cancelled";
+        } else {
+          pill.innerHTML = '<span class="pulse"></span> ' + escHtml(evt.message || status);
+        }
+      }
+
+      // ── Status polling (fallback if SSE silently stalls) ──────────────────────
+      function startStatusPolling(jobId) {
+        stopStatusPolling();
+        statusPollInterval = setInterval(async () => {
+          if (!currentJobId || currentJobId !== jobId) { stopStatusPolling(); return; }
+          try {
+            const resp = await fetch(`/api/status/${jobId}`);
+            if (!resp.ok) return;
+            const st = await resp.json();
+            // If SSE is gone but job is actually done, recover
+            if (!eventSource && isRunning &&
+                ["complete", "failed", "cancelled"].includes(st.status)) {
+              stopStatusPolling();
+              isRunning = false;
+              sessionStorage.removeItem("vdaworld_job");
+              document.getElementById("generate-btn").disabled = false;
+              handleEvent({ type: "status", status: st.status }, currentGenName);
+              if (st.status === "complete" && currentGenName)
+                setTimeout(() => loadGenerationResults(currentGenName), 400);
+            }
+          } catch (_) {}
+        }, 10000);
+      }
+
+      function stopStatusPolling() {
+        if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+      }
+
+      async function cancelRun() {
+        if (!currentJobId) return;
+        document.getElementById("cancel-btn").disabled = true;
+        try {
+          await fetch(`/api/cancel/${currentJobId}`, { method: "POST" });
+        } catch (e) {}
+      }
+
+      async function rerunGeneration() {
+        if (!currentGenName) return;
+        const btn = document.getElementById("rerun-btn");
+        btn.disabled = true;
+        btn.textContent = "Queuing…";
+        try {
+          const resp = await fetch(`/api/rerun/${encodeURIComponent(currentGenName)}`, { method: "POST" });
+          if (!resp.ok) {
+            const msg = await resp.text();
+            alert("Re-run failed: " + msg);
+            btn.disabled = false;
+            btn.textContent = "↺ Re-run";
+            return;
+          }
+          const data = await resp.json();
+          currentJobId = data.job_id;
+          isRunning = true;
+          document.getElementById("generate-btn").disabled = true;
+          sessionStorage.setItem("vdaworld_job", JSON.stringify({
+            jobId: data.job_id, name: data.name,
+            caption: document.getElementById("run-caption").textContent,
+          }));
+          // Reset run view and reattach stream
+          document.getElementById("live-feed").innerHTML = "";
+          document.getElementById("live-feed-wrap").style.display = "block";
+          document.getElementById("output-section").classList.add("hidden");
+          document.getElementById("output-section").innerHTML = "";
+          document.getElementById("results-tabs").classList.add("hidden");
+          document.getElementById("stats-bar").classList.add("hidden");
+          document.getElementById("log-panel").innerHTML = "";
+          document.getElementById("log-panel").classList.remove("open");
+          logLines = 0;
+          document.getElementById("log-count").textContent = "0 lines";
+          ["tab-turns", "tab-code", "tab-response", "tab-prompt", "tab-thinking"].forEach((id) => {
+            const el = document.getElementById(id);
+            el.innerHTML = "";
+            el.classList.remove("active");
+          });
+          btn.disabled = false;
+          btn.textContent = "↺ Re-run";
+          startStatusPolling(data.job_id);
+          await startStream(data.job_id, data.name);
+        } catch (e) {
+          alert("Re-run failed: " + e.message);
+          btn.disabled = false;
+          btn.textContent = "↺ Re-run";
+        }
+      }
+
+      // ── Tool classification ────────────────────────────────────────────────────
+      const GENERATIVE_TOOLS = new Set(["write_code_from_scratch", "edit_code"]);
+      const INFO_TOOLS = new Set(["get_api_documentation", "read_tool_call_metadata", "read_world_api_call_metadata"]);
+
+      function toolTag(tool) {
+        if (GENERATIVE_TOOLS.has(tool)) return `<span class="tc-tag generative">generative</span>`;
+        if (INFO_TOOLS.has(tool))       return `<span class="tc-tag info">info</span>`;
+        return                                  `<span class="tc-tag critic">critic</span>`;
+      }
+
+      // ── Tool call card ────────────────────────────────────────────────────────
+      function addToolCallCard(meta, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const tool = meta.tool || meta._folder?.replace(/^\d+_/, "") || "unknown";
+        const idx = meta.index ?? "?";
+
+        const args = meta.args || {};
+        let argsText = "";
+        if (typeof args === "object") {
+          argsText = Object.entries(args)
+            .map(([k, v]) => {
+              const val =
+                typeof v === "string" && v.length > 300
+                  ? v.slice(0, 300) + "\n… (truncated)"
+                  : v;
+              return `${k}: ${val}`;
+            })
+            .join("\n\n");
+        } else {
+          argsText = String(args);
+        }
+
+        const resultSummary = meta.result_summary || "";
+        const images = meta.images || [];
+
+        const card = document.createElement("div");
+        card.className = "tc-card";
+        card.dataset.tool = tool;
+
+        card.innerHTML = `
+          <div class="tc-header" onclick="toggleCard(this.parentElement)">
+            <div class="tc-index">${escHtml(String(idx))}</div>
+            <div class="tc-tool-name">${escHtml(tool)}</div>
+            ${toolTag(tool)}
+            <div class="tc-summary">${escHtml(truncate(String(resultSummary), 55))}</div>
+            <div class="tc-chevron">▼</div>
+          </div>
+          <div class="tc-body">
+            ${argsText ? `
+              <div class="tc-section">
+                <div class="tc-section-label">Arguments</div>
+                <div class="tc-code">${escHtml(argsText)}</div>
+              </div>` : ""}
+            ${resultSummary ? `
+              <div class="tc-section">
+                <div class="tc-section-label">Result</div>
+                <div class="tc-result">${escHtml(resultSummary)}</div>
+              </div>` : ""}
+            ${images.length ? `
+              <div class="tc-section">
+                <div class="tc-section-label">Frames</div>
+                <div class="tc-images">
+                  ${images.map((src) => `<img class="tc-img" src="${escHtml(src)}" loading="lazy" onclick="openLightbox('${src}',event)">`).join("")}
+                </div>
+              </div>` : ""}
+          </div>`;
+
+        // During live run: keep latest card open
+        const prev = container.querySelector(".tc-card.open");
+        if (prev && containerId === "live-feed") prev.classList.remove("open");
+        if (containerId === "live-feed") card.classList.add("open");
+
+        container.appendChild(card);
+        card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function toggleCard(card) {
+        card.classList.toggle("open");
+      }
+
+      // ── Log ───────────────────────────────────────────────────────────────────
+      function appendLog(evt) {
+        const panel = document.getElementById("log-panel");
+        const line = document.createElement("div");
+        line.className = `log-line ${evt.level}`;
+        line.textContent = evt.message;
+        panel.appendChild(line);
+        panel.scrollTop = panel.scrollHeight;
+        logLines++;
+        document.getElementById("log-count").textContent =
+          logLines + " line" + (logLines !== 1 ? "s" : "");
+      }
+
+      function toggleLog() {
+        const panel = document.getElementById("log-panel");
+        const icon = document.getElementById("log-toggle-icon");
+        panel.classList.toggle("open");
+        icon.textContent = panel.classList.contains("open") ? "▾" : "▸";
+      }
+
+      // ── Load completed generation results ─────────────────────────────────────
+      async function loadGenerationResults(name) {
+        try {
+          const resp = await fetch(
+            `/api/generation/${encodeURIComponent(name)}`,
+          );
+          if (!resp.ok) return;
+          const data = await resp.json();
+          renderResults(data);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function renderResults(data) {
+        // Hide live feed, show tabs
+        document.getElementById("live-feed-wrap").style.display = "none";
+        document.getElementById("results-tabs").classList.remove("hidden");
+
+        // Activate Turns tab by default
+        document.querySelectorAll(".results-tab").forEach((t) => t.classList.remove("active"));
+        document.querySelector('[data-rtab="turns"]').classList.add("active");
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        document.getElementById("tab-turns").classList.add("active");
+
+        // ── Output section (always visible above tabs) ────────────────────────
+        const vis = data.visualizations || {};
+        const hasVideo = !!vis["simulation.mp4"];
+        const hasFrames = !!(vis["frame_0_gt.png"] || vis["frame_0_sim.png"]);
+        const outSection = document.getElementById("output-section");
+        outSection.classList.remove("hidden");
+
+        if (!hasVideo && !hasFrames) {
+          outSection.innerHTML = `<div class="output-empty">Model produced no output.</div>`;
+        } else {
+          let outHtml = '<div class="output-grid" style="padding-bottom:16px">';
+          if (hasVideo) {
+            outHtml += `
+              <div class="output-card" style="grid-column:1/-1">
+                <div class="output-card-header">▶ Simulation Video</div>
+                <div class="output-card-body">
+                  <video controls autoplay loop muted playsinline>
+                    <source src="${vis["simulation.mp4"]}" type="video/mp4">
+                  </video>
+                </div>
+              </div>`;
+          }
+          if (hasFrames) {
+            outHtml += `
+              <div class="output-card" style="grid-column:1/-1">
+                <div class="output-card-header">Initial Frame — Ground Truth vs Simulator</div>
+                <div class="output-card-body"><div class="compare-row">`;
+            if (vis["frame_0_gt.png"]) outHtml += `
+                  <div>
+                    <div class="compare-label">Ground Truth</div>
+                    <img class="output-img" src="${vis["frame_0_gt.png"]}" onclick="openLightbox('${vis["frame_0_gt.png"]}',event)" style="cursor:pointer">
+                  </div>`;
+            if (vis["frame_0_sim.png"]) outHtml += `
+                  <div>
+                    <div class="compare-label">Simulator</div>
+                    <img class="output-img" src="${vis["frame_0_sim.png"]}" onclick="openLightbox('${vis["frame_0_sim.png"]}',event)" style="cursor:pointer">
+                  </div>`;
+            outHtml += `</div></div></div>`;
+          }
+          outHtml += "</div>";
+          outSection.innerHTML = outHtml;
+        }
+
+        // ── Turns tab ─────────────────────────────────────────────────────────
+        const turnsPanel = document.getElementById("tab-turns");
+        turnsPanel.innerHTML = '<div class="feed" id="turns-feed"></div>';
+        (data.tool_calls || []).forEach((tc) => addToolCallCard(tc, "turns-feed"));
+
+        // ── Code tab ──────────────────────────────────────────────────────────
+        const codePanel = document.getElementById("tab-code");
+        if (data.code) {
+          const highlighted = escHtml(data.code);
+          codePanel.innerHTML = `
+            <div class="code-wrapper">
+              <div class="code-header">
+                <div class="dot"></div>
+                simulator_gen.py &nbsp;·&nbsp; ${data.code.split("\n").length} lines
+              </div>
+              <pre><code class="language-python">${highlighted}</code></pre>
+            </div>`;
+        } else {
+          codePanel.innerHTML = `<div class="output-empty">No code generated.</div>`;
+        }
+
+        // ── Response / Prompt / Thinking tabs ─────────────────────────────────
+        function renderTextTab(panelId, content, emptyMsg) {
+          const panel = document.getElementById(panelId);
+          if (content && content.trim()) {
+            panel.innerHTML = `<div class="code-wrapper"><pre style="padding:16px;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,monospace;font-size:12px;color:var(--text-2);margin:0;max-height:none">${escHtml(content)}</pre></div>`;
+          } else {
+            panel.innerHTML = `<div class="output-empty">${emptyMsg}</div>`;
+          }
+        }
+        renderTextTab("tab-response", data.response, "No response recorded.");
+        renderTextTab("tab-prompt",   data.prompt,   "No prompt recorded.");
+        renderTextTab("tab-thinking", data.thinking, "No thinking recorded (model may not use visible reasoning).");
+
+        loadHistory();
+      }
+
+      // ── History ───────────────────────────────────────────────────────────────
+      async function loadHistory() {
+        const list = document.getElementById("history-list");
+        list.innerHTML = '<div class="history-empty">Loading…</div>';
+        try {
+          // Fetch generations and live queue state in parallel
+          const [gensResp, queueResp] = await Promise.all([
+            fetch("/api/generations"),
+            fetch("/api/queue"),
+          ]);
+          const gens = await gensResp.json();
+
+          // Build a set of names that are currently live (running or queued)
+          const liveJobs = {}; // name -> {job_id, status, position?}
+          if (queueResp.ok) {
+            const q = await queueResp.json();
+            for (const j of (q.running || [])) liveJobs[j.name] = { job_id: j.job_id, status: j.status };
+            for (const j of (q.queued  || [])) liveJobs[j.name] = { job_id: j.job_id, status: "queued", position: j.position };
+          }
+
+          if (!gens.length && Object.keys(liveJobs).length === 0) {
+            list.innerHTML = '<div class="history-empty">No previous generations found.</div>';
+            return;
+          }
+
+          list.innerHTML = "";
+
+          // Prepend any live jobs that aren't yet in the gens list (too new to have output)
+          for (const [name, info] of Object.entries(liveJobs)) {
+            if (!gens.find((g) => g.name === name)) {
+              gens.unshift({ name, caption: "", tool_call_count: 0, has_video: false, thumbnail: null, mtime: Date.now() / 1000 });
+            }
+          }
+
+          gens.forEach((g) => {
+            const live = liveJobs[g.name];
+            const card = document.createElement("div");
+            card.className = "hist-card" + (g.name === currentGenName ? " active" : "");
+
+            const liveBadgeLabel = live
+              ? (live.status === "queued" ? `Queued #${live.position}` : "Running")
+              : "";
+            const liveBadge = live
+              ? `<div class="hist-live-badge"><span class="pulse"></span>${liveBadgeLabel}</div>`
+              : "";
+
+            card.innerHTML = `
+        ${g.thumbnail
+          ? `<img class="hist-thumb" src="${escHtml(g.thumbnail)}" loading="lazy">`
+          : `<div class="hist-thumb-placeholder">🌍</div>`}
+        <div class="hist-info">
+          <div class="hist-name">${escHtml(g.name)}</div>
+          <div class="hist-caption">${escHtml(g.caption || "—")}</div>
+          <div class="hist-meta">${g.tool_call_count} tool calls${g.has_video ? " · has video" : ""}</div>
+          ${liveBadge}
+        </div>`;
+
+            card.addEventListener("click", () => {
+              if (live) attachToJob(live.job_id, g.name, g.caption || "");
+              else browseGeneration(g.name);
+            });
+            list.appendChild(card);
+          });
+        } catch (e) {
+          list.innerHTML = '<div class="history-empty">Failed to load history.</div>';
+        }
+      }
+
+      async function browseGeneration(name) {
+        currentGenName = name;
+        // Update UI
+        document.getElementById("welcome-view").classList.add("hidden");
+        document.getElementById("run-view").classList.remove("hidden");
+        document.getElementById("run-name").textContent = name;
+        document.getElementById("run-caption").textContent = "";
+        document.getElementById("status-pill").className =
+          "status-pill complete";
+        document.getElementById("status-pill").innerHTML = "✓ Loaded";
+        document.getElementById("stats-bar").classList.add("hidden");
+        document.getElementById("live-feed-wrap").style.display = "none";
+        document.getElementById("cancel-btn").classList.add("hidden");
+        document.getElementById("rerun-btn").classList.remove("hidden");
+
+        // Mark active in history
+        document
+          .querySelectorAll(".hist-card")
+          .forEach((c) => c.classList.remove("active"));
+        document.querySelectorAll(".hist-card").forEach((c) => {
+          if (c.querySelector(".hist-name")?.textContent === name)
+            c.classList.add("active");
+        });
+
+        await loadGenerationResults(name);
+
+        // Show output tab caption
+        try {
+          const resp = await fetch(
+            `/api/generation/${encodeURIComponent(name)}`,
+          );
+          const data = await resp.json();
+          document.getElementById("run-caption").textContent =
+            data.caption || "";
+          document.getElementById("run-name").textContent = name;
+        } catch (e) {}
+      }
+
+      // ── Lightbox ──────────────────────────────────────────────────────────────
+      function openLightbox(src, e) {
+        e.stopPropagation();
+        document.getElementById("lightbox-img").src = src;
+        document.getElementById("lightbox").classList.add("open");
+      }
+      function closeLightbox() {
+        document.getElementById("lightbox").classList.remove("open");
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeLightbox();
+      });
+
+      // ── Helpers ───────────────────────────────────────────────────────────────
+      function escHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+      function truncate(s, n) {
+        return s.length > n ? s.slice(0, n) + "…" : s;
+      }
+      function fmtNum(n) {
+        return Number(n).toLocaleString();
+      }
+
+      // ── Attach to a live job (works across tabs / page reloads) ──────────────
+      async function attachToJob(jobId, name, caption) {
+        if (isRunning && currentJobId === jobId) return; // already watching this job
+        currentJobId = jobId;
+        currentGenName = name;
+        isRunning = true;
+        document.getElementById("generate-btn").disabled = true;
+        sessionStorage.setItem("vdaworld_job", JSON.stringify({ jobId, name, caption }));
+        setRunView(name, caption);
+        await startStream(jobId, name);
+      }
+
+      // ── On-load recovery: ask the server what's running ───────────────────────
+      // This works even in a fresh tab with no sessionStorage.
+      async function recoverActiveJob() {
+        try {
+          const resp = await fetch("/api/queue");
+          if (!resp.ok) return;
+          const q = await resp.json();
+          const active = [...(q.running || []), ...(q.queued || [])];
+          if (active.length === 0) {
+            sessionStorage.removeItem("vdaworld_job");
+            return;
+          }
+          // Auto-attach to the first active job
+          const job = active[0];
+          // Try to get caption from sessionStorage if this is the same job we launched
+          let caption = job.caption || "";
+          try {
+            const saved = JSON.parse(sessionStorage.getItem("vdaworld_job") || "{}");
+            if (saved.jobId === job.job_id) caption = saved.caption || caption;
+          } catch (_) {}
+          await attachToJob(job.job_id, job.name, caption);
+        } catch (_) {}
+      }
+
+      // ── Init ──────────────────────────────────────────────────────────────────
+      loadHistory();
+      recoverActiveJob();
+    </script>
+  </body>
+</html>

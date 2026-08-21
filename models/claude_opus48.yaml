@@ -1,0 +1,5 @@
+model_name: claude-opus-4-8
+backend: anthropic
+input_price: 5.0
+output_price: 25.0
+cache_price: 0.5

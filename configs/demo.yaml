@@ -1,0 +1,15 @@
+# Hosted Gemini example.
+vlm:
+  model: gemini_pro
+  temperature: 1.0
+
+task:
+  image_path: "example_data/demo.png"
+  caption: "A simple rigid body collision scene."
+  output_dir: "results/demo/collision"
+  simulator_class_name: "VideoSimulation"
+  prompts_path: "prompts/generic"
+  fps: 30
+  simulation_steps: 150
+  frame_size: [1280, 720]
+  critic_max_turns: 25
