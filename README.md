@@ -1,6 +1,6 @@
 # VDAWorld: World Modelling via VLM-Directed Abstraction and Simulation
 
-_This is the official repository for [VDAWorld: World Modelling via VLM-Directed Abstraction and Simulation](https://felixomahony.github.io/vdaworld) (SIGGRAPH Asia 2026)._
+_This is the official repository for [VDAWorld: World Modelling via VLM-Directed Abstraction and Simulation](https://felixomahony.github.io/vdaworld) (SIGGRAPH Asia 2026). See [HSPBench](https://github.com/felixomahony/HSPBench) and [ConwayBench](https://github.com/felixomahony/ConwayBench) for associated benchmarks._
 
 <video controls>
   <source src="docs/source_grid.mp4" type="video/mp4">
