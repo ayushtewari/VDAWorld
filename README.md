@@ -2,9 +2,7 @@
 
 _This is the official repository for [VDAWorld: World Modelling via VLM-Directed Abstraction and Simulation](https://felixomahony.github.io/vdaworld) (SIGGRAPH Asia 2026). See [HSPBench](https://github.com/felixomahony/HSPBench) and [ConwayBench](https://github.com/felixomahony/ConwayBench) for associated benchmarks._
 
-<video controls>
-  <source src="docs/source_grid.mp4" type="video/mp4">
-</video>
+![VDAWorld simulation examples](docs/source_grid.gif)
 
 Generative video models, a leading approach to world modeling, face fundamental limitations. They often violate physical and logical rules, lack interactivity, and operate as opaque black boxes ill-suited for building structured, queryable worlds. To overcome these challenges, we propose a new paradigm focused on distilling an image caption pair into a tractable, abstract representation optimized for simulation. We introduce VDAWorld, a framework where a Vision-Language Model (VLM) acts as an intelligent agent to orchestrate this process. The VLM autonomously constructs a grounded (2D or 3D) scene representation by selecting from a suite of vision tools, and co-dependently chooses a compatible physics simulator (e.g., rigid body, fluid) to act upon it. Furthermore, VDAWorld can infer latent dynamics from the static scene to predict plausible future states. Our experiments show that this combination of intelligent abstraction and adaptive simulation results in a versatile world model capable of producing higher-quality simulations across a wider range of dynamic scenarios than prior approaches.
 
